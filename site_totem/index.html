@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta http-equiv="Content-Language" content="pt-br" />
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1;" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./assets/styles/mainStyles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <title>TOTEM DA QUALIDADE</title>
+  </head>
+  <body class="min-h-screen py-5 flex flex-col justify-between">
+    <!-- 192.168.1.2 -->
+    <!-- HEADER -->
+    <header
+      class="flex flex-col gap-y-6 tablet:gap-y-4 items-center justify-center mx-auto max-w-[90%]"
+    >
+      <div class="tablet:w-48">
+        <img
+          src="./assets/images/logo_ctc.jpeg"
+          alt="LOGO-CTC"
+          class="w-full"
+        />
+      </div>
+      <h1
+        class="text-3xl tablet:text-2xl w-full text-center text-[#A2823C] font-bold"
+      >
+        SELECIONE A OPÇÃO DESEJADA:
+      </h1>
+    </header>
+
+    <!-- LISTA DE OPÇÕES -->
+    <main
+      class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 py-6 mx-auto max-w-[90%]"
+    >
+      <!-- OPÇÕES -->
+      <div
+        onclick="openModal('POP')"
+        class="cursor-pointer px-2 font-bold rounded-lg flex items-center justify-center w-full tablet:w-56 h-20 text-center bg-[#98B5A0] text-sm tablet:text-base"
+      >
+        CONSULTA DE PROCEDIMENTOS OPERACIONAIS (POP)
+      </div>
+      <div
+        onclick="openModal('NC')"
+        class="cursor-pointer px-2 font-bold rounded-lg flex items-center justify-center w-full tablet:w-56 h-20 text-center bg-[#98B5A0] text-sm tablet:text-base"
+      >
+        APONTAMENTO DE NÃO CONFORMIDADES (NC)
+      </div>
+      <div
+        onclick="openModal('CHAMADO')"
+        class="cursor-pointer px-2 font-bold rounded-lg flex items-center justify-center w-full tablet:w-56 h-20 text-center bg-[#98B5A0] text-sm tablet:text-base"
+      >
+        ABERTURA DE CHAMADO PARA QUALIDADE
+      </div>
+      <div
+        onclick="openModal('MELHORIA')"
+        class="cursor-pointer px-2 font-bold rounded-lg flex items-center justify-center w-full tablet:w-56 h-20 text-center bg-[#98B5A0] text-sm tablet:text-base"
+      >
+        PROPOSTA DE MELHORIA CONTÍNUA
+      </div>
+      <div
+        onclick="openModal('MANUAIS')"
+        class="cursor-pointer px-2 font-bold rounded-lg flex items-center justify-center w-full tablet:w-56 h-20 text-center bg-[#98B5A0] text-sm tablet:text-base"
+      >
+        CONSULTA DE MANUAIS E POLÍTICAS
+      </div>
+    </main>
+
+    <!-- MODAL -->
+    <div id="pdfModal" class="modal">
+      <div class="modal-content" style="width: 95%; max-width: 800px">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2
+          id="modalTitle"
+          class="text-xl tablet:text-2xl font-bold text-[#A2823C] mb-4"
+        >
+          CASTANHAL
+        </h2>
+
+        <div id="selectionView">
+          <h3 class="text-lg tablet:text-xl font-semibold mb-4">
+            SELECIONE O DOCUMENTO PARA CONSULTA:
+          </h3>
+          <div id="documentList" class="mb-6">
+            <!-- Lista de documentos permanece igual -->
+          </div>
+        </div>
+
+        <div id="pdfViewer" style="display: none; height: 60vh">
+          <iframe
+            id="pdfFrame"
+            style="width: 100%; height: 100%; border: none"
+          ></iframe>
+          <button
+            onclick="backToList()"
+            class="cursor-pointer mt-4 bg-[#367049] text-white py-2 px-4 rounded text-sm tablet:text-base"
+          >
+            Voltar para lista
+          </button>
+        </div>
+        <div class="text-center mt-4">
+          <span class="text-[#367049] font-bold text-sm tablet:text-base"
+            >Gestão de Engenharia e Qualidade</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="p-1 rounded-lg text-center bg-[#E1D8B7] w-[50%] mx-auto">
+      <span class="text-[#367049] font-bold text-sm tablet:text-base"
+        >Gestão de Engenharia e Qualidade</span
+      >
+    </footer>
+
+    <script>
+      // Banco de dados de documentos por categoria
+      const documentDatabase = {
+        POP: [
+          {
+            name: "POP 038 - Rev. 01 - Descarregar matéria-prima",
+            file: "POP_038_Rev_01_Descarregar_materia_prima.pdf",
+          },
+          {
+            name: "POP 039 - Rev. 01 - Descarregar suprimentos",
+            file: "POP_039_Rev_01_Descarregar_suprimentos.pdf",
+          },
+          {
+            name: "POP 040 - Rev. 01 - Carregar pó de malva",
+            file: "POP_040_Rev_01_Carregar_po_de_malva.pdf",
+          },
+          {
+            name: "POP 041 - Rev. 01 Carregar e descarregar carvão",
+            file: "POP_041_Rev_01_Carregar_e_descarregar_carvao.pdf",
+          },
+        ],
+        NC: [
+          { name: "Formulário de Não Conformidade", file: "FORMULARIO_NC.pdf" },
+          { name: "Registro de NC 2023", file: "REGISTRO_NC_2023.pdf" },
+        ],
+        CHAMADO: [
+          {
+            name: "Formulário de Abertura de Chamado",
+            file: "FORMULARIO_CHAMADO.pdf",
+          },
+          { name: "Fluxo de Atendimento", file: "FLUXO_ATENDIMENTO.pdf" },
+        ],
+        MELHORIA: [
+          {
+            name: "Formulário de Sugestão de Melhoria",
+            file: "FORMULARIO_MELHORIA.pdf",
+          },
+          {
+            name: "Registro de Melhorias Implementadas",
+            file: "MELHORIAS_IMPLEMENTADAS.pdf",
+          },
+        ],
+        MANUAIS: [
+          { name: "Manual da Qualidade", file: "MANUAIS/DANFE10000099234.pdf" },
+          {
+            name: "Política de Gestão",
+            file: "MANUAIS/TrabalhoFinal_InteligenciaArtificial (1).pdf",
+          },
+          { name: "DANFE10000099234", file: "MANUAIS/DANFE10000099234.pdf" },
+        ],
+      };
+
+      function openModal(category) {
+        const modal = document.getElementById("pdfModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const documentList = document.getElementById("documentList");
+
+        // Define o título conforme a categoria
+        const titles = {
+          POP: "PROCEDIMENTOS OPERACIONAIS (POP)",
+          NC: "NÃO CONFORMIDADES (NC)",
+          CHAMADO: "ABERTURA DE CHAMADO",
+          MELHORIA: "MELHORIA CONTÍNUA",
+          MANUAIS: "MANUAIS E POLÍTICAS",
+        };
+        modalTitle.textContent = titles[category] || "CASTANHAL";
+
+        // Limpa a lista atual
+        documentList.innerHTML = "";
+
+        // Adiciona os documentos da categoria selecionada
+        if (documentDatabase[category]) {
+          documentDatabase[category].forEach((doc) => {
+            const item = document.createElement("div");
+            item.className = "document-item";
+            item.innerHTML = `
+                        <i class="fas fa-file-pdf pdf-icon"></i>
+                        <span>${doc.name}</span>
+                    `;
+            item.onclick = () => showPdf(doc.file);
+            documentList.appendChild(item);
+          });
+        } else {
+          documentList.innerHTML =
+            "<p>Nenhum documento disponível para esta categoria.</p>";
+        }
+
+        // Garante que estamos mostrando a lista, não o visualizador
+        backToList();
+        modal.style.display = "block";
+      }
+
+      function showPdf(pdfFileName) {
+        document.getElementById("selectionView").style.display = "none";
+        const pdfViewer = document.getElementById("pdfViewer");
+        const pdfFrame = document.getElementById("pdfFrame");
+
+        pdfFrame.src = `./assets/pdfs/${pdfFileName}`;
+        pdfViewer.style.display = "block";
+      }
+
+      function backToList() {
+        document.getElementById("pdfViewer").style.display = "none";
+        document.getElementById("selectionView").style.display = "block";
+        document.getElementById("pdfFrame").src = "";
+      }
+
+      function closeModal() {
+        backToList(); // Resetar para a lista ao fechar
+        document.getElementById("pdfModal").style.display = "none";
+      }
+
+      // Fechar o modal se o usuário clicar fora dele
+      window.onclick = function (event) {
+        const modal = document.getElementById("pdfModal");
+        if (event.target === modal) {
+          closeModal();
+        }
+      };
+    </script>
+  </body>
+</html>

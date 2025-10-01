@@ -41,8 +41,7 @@
         onclick="openModal('POP')"
         class="cursor-pointer px-2 font-bold rounded-lg flex items-center justify-center w-full tablet:w-56 h-20 text-center bg-[#98B5A0] text-sm tablet:text-base"
       >
-        <!-- CONSULTA DE PROCEDIMENTOS OPERACIONAIS (POP) -->
-        OPERAÇÃO LOGÍSTICA
+        CONSULTA DE PROCEDIMENTOS OPERACIONAIS (POP)
       </div>
       <div
         onclick="openModal('NC')"
@@ -102,10 +101,13 @@
             Voltar para lista
           </button>
         </div>
-        <div class="text-center mt-4">
-          <span class="text-[#367049] font-bold text-sm tablet:text-base"
-            >Gestão de Engenharia e Qualidade</span
+        <div class="text-center mt-4 justify-center">
+          <button
+            onclick="closeModal()"
+            class="bg-[#367049] text-white p-2 rounded-lg cursor-pointer"
           >
+            Fechar
+          </button>
         </div>
       </div>
     </div>
@@ -113,126 +115,124 @@
     <!-- FOOTER -->
     <footer class="p-1 rounded-lg text-center bg-[#E1D8B7] w-[50%] mx-auto">
       <span class="text-[#367049] font-bold text-sm tablet:text-base"
-        >Gestão de Engenharia e Qualidade</span
+        >Gestão de Engenharia e Qualidade - Desenvolvido pela Equipe de TI da
+        CTC</span
       >
     </footer>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
-    // Banco de dados de documentos por categoria
-    const documentDatabase = {
-      POP: [
-        {
-          name: "01 - Operação Logística",
-          pdfs: "",
-          file: "https://forms.office.com/r/YHJFAueFtc",
-        },
-        {
-          name: "02 - Matéria prima",
-          file: "POP_039_Rev_01_Descarregar_suprimentos.pdf",
-        },
-        {
-          name: "03 - Preparação",
-          file: "POP_040_Rev_01_Carregar_po_de_malva.pdf",
-        },
-        {
-          name: "04 - Fiação",
-          file: "POP_041_Rev_01_Carregar_e_descarregar_carvao.pdf",
-        },
-        {
-          name: "05 - Tecelegam",
-          file: "POP_041_Rev_01_Carregar_e_descarregar_carvao.pdf",
-        },
-        {
-          name: "06 - Acabamento",
-          file: "POP_041_Rev_01_Carregar_e_descarregar_carvao.pdf",
-        },
-        {
-          name: "07 - Filial Manacapuru",
-          file: "POP_041_Rev_01_Carregar_e_descarregar_carvao.pdf",
-        },
-      ],
-      NC: [
-        {
-          name: "Apontamento de não conformidades (NC)",
-          file: "https://forms.office.com/r/YHJFAueFtc",
-        },
-      ],
-      CHAMADO: [
-        {
-          name: "Formulário de Abertura de Chamado",
-          file: "FORMULARIO_CHAMADO.pdf",
-        },
-        { name: "Fluxo de Atendimento", file: "FLUXO_ATENDIMENTO.pdf" },
-      ],
-      MELHORIA: [
-        {
-          name: "Proposta de melhoria contínua",
-          file: "https://forms.office.com/r/UV1VNnJ8k0",
-        },
-      ],
-      MANUAIS: [
-        { name: "Manual da Qualidade", file: "MANUAIS/DANFE10000099234.pdf" },
-        {
-          name: "Política de Gestão",
-          file: "MANUAIS/TrabalhoFinal_InteligenciaArtificial (1).pdf",
-        },
-        { name: "DANFE10000099234", file: "MANUAIS/DANFE10000099234.pdf" },
-      ],
-    };
+    let pdfTree = {}; // JSON vindo do backend
+    let currentPath = []; // Caminho atual (ex: ["POP","01-operacao_logistica"])
+
+    async function getPdfs() {
+      try {
+        const res = await axios.get("http://localhost:3100/api/pdfs");
+        pdfTreeResponse = res.data; // Armazena a estrutura
+        pdfTree = {
+          ...pdfTreeResponse,
+          NC: {
+            name: "Apontamento de não conformidades (NC)",
+            link: "https://forms.office.com/r/YHJFAueFtc",
+          },
+          MELHORIA: {
+            name: "Proposta de melhoria contínua",
+            link: "https://forms.office.com/r/UV1VNnJ8k0",
+          },
+        };
+        console.log("PDF Tree:", pdfTree);
+      } catch (err) {
+        console.error("Erro ao buscar PDFs:", err);
+      }
+    }
+    getPdfs();
 
     function openModal(category) {
-      const modal = document.getElementById("modal");
-      const modalTitle = document.getElementById("modalTitle");
-      const documentList = document.getElementById("documentList");
-
-      // Define o título conforme a categoria
-      const titles = {
-        POP: "PROCEDIMENTOS OPERACIONAIS (POP)",
-        NC: "NÃO CONFORMIDADES (NC)",
-        CHAMADO: "ABERTURA DE CHAMADO",
-        MELHORIA: "MELHORIA CONTÍNUA",
-        MANUAIS: "MANUAIS E POLÍTICAS",
-      };
-      modalTitle.textContent = titles[category] || "CASTANHAL";
-
-      // Limpa a lista atual
-      documentList.innerHTML = "";
-
-      // Adiciona os documentos da categoria selecionada
-      documentDatabase[category].forEach((doc) => {
-        const item = document.createElement("div");
-        item.className = "document-item";
-        // Verifica se é um link externo (forms)
-        if (doc.file.startsWith("http")) {
-          item.innerHTML = `
-                        <i class="fas fa-link pdf-icon"></i>
-                        <span>${doc.name}</span>
-                    `;
-          item.onclick = () => showForms(doc.file);
-        } else {
-          item.innerHTML = `
-                        <i class="fas fa-folder pdf-icon"></i>
-                        <span>${doc.name}</span>
-                    `;
-          item.onclick = () => showPdf(doc.file);
-        }
-        documentList.appendChild(item);
-      });
-
-      // Garante que estamos mostrando a lista, não o visualizador
-      backToList();
-      modal.style.display = "block";
+      currentPath = [category]; // Ex.: ["POP"]
+      updateModalView();
+      document.getElementById("modal").style.display = "block";
     }
 
-    function showPdf(pdfFileName) {
+    function updateModalView() {
+      const modalTitle = document.getElementById("modalTitle");
+      const documentList = document.getElementById("documentList");
+      const selectionView = document.getElementById("selectionView");
+      const viewer = document.getElementById("viewer");
+
+      viewer.style.display = "none";
+      selectionView.style.display = "block";
+      documentList.innerHTML = "";
+
+      // Caminho atual no JSON
+      let pointer = pdfTree;
+      currentPath.forEach((p) => (pointer = pointer[p]));
+
+      modalTitle.textContent = "📂 " + currentPath.join(" / ");
+
+      // Pastas (subdiretórios)
+      for (const key in pointer) {
+        if (key !== "name" && key !== "link" && key !== "files") {
+          const folder = document.createElement("div");
+          folder.className = "document-item";
+          folder.innerHTML = `<i class="fas fa-folder pdf-icon"></i><span>${key}</span>`;
+          folder.onclick = () => {
+            currentPath.push(key);
+            updateModalView();
+          };
+          documentList.appendChild(folder);
+        }
+      }
+
+      if (pointer.link) {
+        const forms = document.createElement("div");
+        forms.className = "document-item";
+        forms.innerHTML = `<i class="fas fa-link pdf-icon"></i><span>${pointer.name}</span>`;
+        forms.onclick = () => {
+          const link = pointer.link;
+          showForms(link);
+        };
+        documentList.appendChild(forms);
+      }
+
+      // Arquivos (PDFs)
+      if (pointer.files) {
+        pointer.files.forEach((file) => {
+          const pdf = document.createElement("div");
+          pdf.className = "document-item";
+          pdf.innerHTML = `<i class="fas fa-file-pdf pdf-icon"></i><span>${file.name}</span>`;
+
+          pdf.onclick = () => {
+            const path = currentPath.join("/") + "/" + file.name;
+            showPdf(path);
+          };
+          documentList.appendChild(pdf);
+        });
+      }
+
+      // Botão de Voltar (se não está na raiz)
+      if (currentPath.length > 1) {
+        const back = document.createElement("div");
+        back.className = "document-item back";
+        back.innerHTML = `<i class="fas fa-arrow-left pdf-icon"></i><span>Voltar</span>`;
+        back.onclick = () => {
+          currentPath.pop();
+          updateModalView();
+        };
+        documentList.prepend(back);
+      }
+    }
+
+    function showPdf(relativePath) {
       document.getElementById("selectionView").style.display = "none";
       const viewer = document.getElementById("viewer");
       const elementFrame = document.getElementById("elementFrame");
+      // Usa Google Docs para preview em mobile/tablet
+      const baseUrl = window.location.origin + "/pdfs/";
 
-      elementFrame.src = `https://docs.google.com/gview?embedded=true&url=${window.location.origin}/assets/pdfs/POP/01-operacao_logistica/POP-EQ-038-02-2024-Descaregar-matéria-prima.pdf`;
-      //https://docs.google.com/gview?embedded=true&url=${window.location.origin}/assets/pdfs/${pdfFileName}
-      // ./assets/pdfs/POP/01-operacao_logistica/POP-EQ-038-02-2024-Descaregar-matéria-prima.pdf
-      // ./assets/pdfs/${pdfFileName}
+      elementFrame.src = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(
+        baseUrl + relativePath
+      )}`;
+
       viewer.style.display = "block";
     }
 
@@ -240,7 +240,6 @@
       document.getElementById("selectionView").style.display = "none";
       const viewer = document.getElementById("viewer");
       const elementFrame = document.getElementById("elementFrame");
-
       elementFrame.src = link;
       viewer.style.display = "block";
     }
@@ -252,16 +251,13 @@
     }
 
     function closeModal() {
-      backToList(); // Resetar para a lista ao fechar
+      backToList();
       document.getElementById("modal").style.display = "none";
     }
 
-    // Fechar o modal se o usuário clicar fora dele
     window.onclick = function (event) {
       const modal = document.getElementById("modal");
-      if (event.target === modal) {
-        closeModal();
-      }
+      if (event.target === modal) closeModal();
     };
   </script>
 </html>

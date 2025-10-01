@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  pdf-server:
+    build: .
+    container_name: servidor-pdf
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./pdfs:/app/pdfs
+      - ./site_totem:/app/site_totem
